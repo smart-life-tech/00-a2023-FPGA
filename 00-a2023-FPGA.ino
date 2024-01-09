@@ -115,24 +115,33 @@ const char m_notavail[] PROGMEM = "# not available";
 const char m_WHAT[] PROGMEM = "# WHAT?";
 const char m_nega[] PROGMEM = "# 168,328, check datasheet";
 
-// Function to collect six serial ASCII chars followed by CR and LF
-void collectDataFromFPGA(char *receivedData)
+// Enumeration for the states of data collection
+enum DataCollectionState
 {
-   /*
-   This code uses the receivedData array to store the received characters. It continues to
-    collect characters until it receives
-    the LF and CR. The received data is null-terminated, making it a valid C string.
-    */
-   uint8_t dataIndex = 0;
+   WAIT_START,
+   COLLECT_DATA,
+   WAIT_LF,
+   WAIT_CR
+};
+
+// Function to collect six serial ASCII chars followed by CR and LF
+// Returns 1 if successful, 0 otherwise
+uint8_t collectDataFromFPGA(char *receivedData)
+{
+   static enum DataCollectionState state = WAIT_START;
+   static uint8_t dataIndex = 0;
    uint8_t rxd;
 
-   // Wait for the start of a new transmission
-   while (TTYs() != 0xFF)
-      ;
-
-   // Collect six ASCII characters
-   while (dataIndex < 6)
+   switch (state)
    {
+   case WAIT_START:
+      if (TTYs() == 0xFF)
+      {
+         state = COLLECT_DATA;
+      }
+      break;
+
+   case COLLECT_DATA:
       if (TTYs() == 0xFF)
       {
          rxd = TTYi(); // Read UART
@@ -147,30 +156,50 @@ void collectDataFromFPGA(char *receivedData)
          dataIndex++;
 
          TTYo(rxd); // Echo to TTY
+
+         // Check if collected 6 characters
+         if (dataIndex >= 6)
+         {
+            state = WAIT_LF;
+         }
       }
-   }
+      break;
 
-   // Wait for LF (0x0A) and CR (0x0D)
-   while (TTYs() != 0xFF)
-      ;
-   rxd = TTYi();
-   if (rxd == 0x0A)
-   {
-      receivedData[dataIndex] = rxd;
-      dataIndex++;
-
-      while (TTYs() != 0xFF)
-         ;
-      rxd = TTYi();
-      if (rxd == 0x0D)
+   case WAIT_LF:
+      if (TTYs() == 0xFF)
       {
-         receivedData[dataIndex] = rxd;
-         dataIndex++;
+         rxd = TTYi();
+         if (rxd == 0x0A)
+         {
+            receivedData[dataIndex] = rxd;
+            dataIndex++;
+            state = WAIT_CR;
+         }
       }
+      break;
+
+   case WAIT_CR:
+      if (TTYs() == 0xFF)
+      {
+         rxd = TTYi();
+         if (rxd == 0x0D)
+         {
+            receivedData[dataIndex] = rxd;
+            dataIndex++;
+            receivedData[dataIndex] = '\0'; // Null-terminate the string
+            state = WAIT_START;
+            return 1; // Successfully collected data
+         }
+         else
+         {
+            // Unexpected character, reset state
+            state = WAIT_START;
+         }
+      }
+      break;
    }
 
-   // Null-terminate the received data
-   receivedData[dataIndex] = '\0';
+   return 0; // Data collection not complete yet
 }
 
 void HELPmsg(void)
@@ -260,7 +289,15 @@ int main(void)
       // Call the function to collect data from FPGA
       // Now, 'receivedData' contains the 6 ASCII characters followed by LF and CR
       // You can use or process the data as needed.
-      collectDataFromFPGA(receivedData);
+      // Non-blocking data collection
+      if (collectDataFromFPGA(receivedData))
+      {
+         // Successfully collected data
+         // 'receivedData' contains the 6 ASCII characters followed by LF and CR
+      }
+
+      // Continue with other non-blocking tasks
+
       dav = TTYs(); // any UART-Input?
 
       if (dav == 0xFF) // yes, when 0xFF
