@@ -76,3 +76,7 @@ This  version uses an enumeration to keep track of the state of data collection.
    The function returns `0` when the data collection is not complete, and `1` when the data collection is successful. This allows the calling code to determine whether the data has been successfully collected.
 
 This function, therefore, represents a finite state machine that efficiently manages the process of collecting specific data from the FPGA in a non-blocking manner.In the context of the provided code, making the data collection from the FPGA non-blocking allows the main program to perform other tasks while waiting for the specific sequence of characters to arrive. The program can periodically check if the data has been successfully collected without waiting for it to finish. This approach is beneficial in systems where responsiveness and the ability to handle multiple tasks concurrently are important.
+
+In ASCII, the uppercase letters 'A' to 'Z' have decimal values from 65 to 90, and the corresponding lowercase letters 'a' to 'z' have values from 97 to 122. The code checks if the received character (rxd) is in the lowercase range and, if so, performs a bitwise AND operation (&= 0xDF) to convert it to uppercase.
+
+The decision to convert characters to uppercase might be driven by the assumption that the specific application or protocol expects uppercase characters. If the FPGA is sending data in uppercase, or if the case sensitivity of the received characters doesn't matter for the application, you can omit this conversion step.
