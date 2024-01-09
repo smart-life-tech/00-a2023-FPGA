@@ -1,0 +1,2 @@
+Please note that this code assumes the existence of the TTYs(), TTYi(), and TTYo() functions to handle UART communication, and it includes the file "a10fpga.h" for FPGA connection
+This code uses the receivedData array to store the received characters. It continues to collect characters until it receives the LF and CR. The received data is null-terminated, making it a valid C string.
