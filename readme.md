@@ -58,7 +58,7 @@ void collectDataFromFPGA(char* receivedData) {
 - Waits for the start of each bit (transition to log0) on PORTC3 before reading the UART data.
 
 ```c
-        rxd = TTYi(); // Read UART from PORTC3
+        rxd = TTYr(); // Read UART from PORTC3
 ```
 
 - Reads the UART data from PORTC3 and stores it in the `rxd` variable.
