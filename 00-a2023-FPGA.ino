@@ -115,92 +115,7 @@ const char m_notavail[] PROGMEM = "# not available";
 const char m_WHAT[] PROGMEM = "# WHAT?";
 const char m_nega[] PROGMEM = "# 168,328, check datasheet";
 
-// Enumeration for the states of data collection
-enum DataCollectionState
-{
-   WAIT_START,
-   COLLECT_DATA,
-   WAIT_LF,
-   WAIT_CR
-};
 
-// Function to collect six serial ASCII chars followed by CR and LF
-// Returns 1 if successful, 0 otherwise
-uint8_t collectDataFromFPGA(char *receivedData)
-{
-   static enum DataCollectionState state = WAIT_START;
-   static uint8_t dataIndex = 0;
-   uint8_t rxd;
-
-   switch (state)
-   {
-   case WAIT_START:
-      if (TTYs() == 0xFF)
-      {
-         state = COLLECT_DATA;
-      }
-      break;
-
-   case COLLECT_DATA:
-      if (TTYs() == 0xFF)
-      {
-         rxd = TTYi(); // Read UART
-
-         // Convert lowercase to uppercase
-         if ((rxd >= 0x61) && (rxd <= 0x7A))
-         {
-            rxd &= 0xDF; // Convert to uppercase
-         }
-
-         receivedData[dataIndex] = rxd;
-         dataIndex++;
-
-         TTYo(rxd); // Echo to TTY
-
-         // Check if collected 6 characters
-         if (dataIndex >= 6)
-         {
-            state = WAIT_LF;
-         }
-      }
-      break;
-
-   case WAIT_LF:
-      if (TTYs() == 0xFF)
-      {
-         rxd = TTYi();
-         if (rxd == 0x0A)
-         {
-            receivedData[dataIndex] = rxd;
-            dataIndex++;
-            state = WAIT_CR;
-         }
-      }
-      break;
-
-   case WAIT_CR:
-      if (TTYs() == 0xFF)
-      {
-         rxd = TTYi();
-         if (rxd == 0x0D)
-         {
-            receivedData[dataIndex] = rxd;
-            dataIndex++;
-            receivedData[dataIndex] = '\0'; // Null-terminate the string
-            state = WAIT_START;
-            return 1; // Successfully collected data
-         }
-         else
-         {
-            // Unexpected character, reset state
-            state = WAIT_START;
-         }
-      }
-      break;
-   }
-
-   return 0; // Data collection not complete yet
-}
 
 void HELPmsg(void)
 {
@@ -290,11 +205,11 @@ int main(void)
       // Now, 'receivedData' contains the 6 ASCII characters followed by LF and CR
       // You can use or process the data as needed.
       // Non-blocking data collection
-      if (collectDataFromFPGA(receivedData))
-      {
-         // Successfully collected data
-         // 'receivedData' contains the 6 ASCII characters followed by LF and CR
-      }
+      // if (collectDataFromFPGA(receivedData))
+      //{
+      // Successfully collected data
+      // 'receivedData' contains the 6 ASCII characters followed by LF and CR
+      //}
 
       // Continue with other non-blocking tasks
 
