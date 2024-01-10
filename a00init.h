@@ -166,6 +166,25 @@
    return(rxd);                                              // return data
   }
 //-----------------------------------------------------------------------------
+// Function to read data from FPGA
+char TTYr() {
+    char receivedData = 0;
+    // PORTC3 is used for communication with the FPGA
+    // Wait for start bit (assuming low start bit)
+    while (PINC & (1 << PC3));
+    // Read 8 data bits
+    for (int i = 0; i < 8; ++i) {
+        // Add delay 
+        asm volatile("nop");
+        if (PINC & (1 << PC3)) {
+            receivedData |= (1 << i);
+        }
+    }
+    // Wait for stop bit
+    while (!(PINC & (1 << PC3)));
+    return receivedData;
+}
+//------------------------------------------------------------------------------
   void Fmsg(const char text[])                               // text is stored
   {char c;                                                   // in prog-mem to
    const char* addr;                                         // save ram

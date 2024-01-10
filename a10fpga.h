@@ -84,13 +84,13 @@ void collectDataFromFPGA(char *receivedData)
           // Check for transition to log0 (start bit)
           while (PINC & (1 << PC3))
                ;
-          rxd = TTYi(); // Read UART from PORTC3
+          rxd = TTYr(); // Read UART from PORTC3
 
           // Validate stop bit (assuming stop bit is expected to be high)
           if (PINC & (1 << PC3))
           {
                // Invalid stop bit, handle the framing error as needed
-               // For simplicity, you might want to discard the current character and continue
+               // For simplicity, we  discarded the current character and continue
                continue;
           }
 
@@ -266,7 +266,7 @@ void FPGA_COMMAND(unsigned int mode)
 
                asm volatile("nop"); // patch here
                // asm volatile("nop"); // receive data here
-               char receivedData[8];
+               char receivedData[8];// data is stored here
                collectDataFromFPGA(receivedData);
                asm volatile("nop"); // patch here
 
