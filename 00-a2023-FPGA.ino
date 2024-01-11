@@ -199,16 +199,7 @@ int main(void)
       //-----------------------------------------------------------------------------
       icp = doqtr(icp); // heartbeat
                         //-----------------------------------------------------------------------------
-                        // declared a char array to store the received data
-      char receivedData[8];
-      // Call the function to collect data from FPGA
-      // Now, 'receivedData' contains the 6 ASCII characters followed by LF and CR
-      // You can use or process the data as needed.
-      // Non-blocking data collection
-      // if (collectDataFromFPGA(receivedData))
-      //{
-      // Successfully collected data
-      // 'receivedData' contains the 6 ASCII characters followed by LF and CR
+ 
       //}
 
       // Continue with other non-blocking tasks
