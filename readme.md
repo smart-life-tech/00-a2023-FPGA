@@ -100,6 +100,23 @@ void collectDataFromFPGA(char* receivedData) {
 
 - Echoes the received character back to the TTY (Teletype) for confirmation.
 
+ Let's break down the line `delayMicroseconds(104 * 16 / 16/2);`:
+
+1. **`104`**: This is the original delay value in microseconds. In the context of the code, this delay represents the time duration for one bit-cell at a baud rate of 9600 bps.
+
+2. **`* 16`**: This multiplication is adjusting the delay value based on the Arduino's XTAL frequency, which is given as 16MHz. The purpose of multiplying by `16` is to account for the difference in clock cycles between a reference clock (in this case, 16MHz) and the assumed reference clock for which the original delay was specified.
+
+3. **`/ 16`**: This division brings the value back to the original time base. It effectively scales the delay value back to the original unit of microseconds.
+
+Putting it all together, the adjusted delay value `(104 * 16 / 16)` takes into account the difference in clock cycles between the reference clock (16MHz) and the assumed reference clock for which the original delay was intended. This adjustment ensures that the delay aligns correctly with the timing expectations at the 16MHz XTAL frequency of the Arduino.
+
+If you find that the timing is not accurate with this adjustment, you may need to experiment with different values or consult the specific documentation for your Arduino model to determine the correct scaling factor for delays based on the XTAL frequency.
+
+The delays have been halved to move the sampling points to the middle of the bit-cell and the middle of each data bit.
+
+The idea is to sample the incoming signal at a point where it is less likely to be affected by noise or distortions.
+
+This adjustment should help in aligning the sampling more accurately with the expected transitions in the received data.
 
 This function, therefore, represents a finite state machine that efficiently manages the process of collecting specific data from the FPGA in a non-blocking manner.In the context of the provided code, making the data collection from the FPGA non-blocking allows the main program to perform other tasks while waiting for the specific sequence of characters to arrive. The program can periodically check if the data has been successfully collected without waiting for it to finish. This approach is beneficial in systems where responsiveness and the ability to handle multiple tasks concurrently are important.
 

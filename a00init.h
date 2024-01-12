@@ -167,23 +167,31 @@
   }
 //-----------------------------------------------------------------------------
 // Function to read data from FPGA
+// Function to read data from FPGA with proper timing
 char TTYr() {
     char receivedData = 0;
-    // PORTC3 is used for communication with the FPGA
+    // Assuming PORTC3 is used for communication with the FPGA
+
     // Wait for start bit (assuming low start bit)
     while (PINC & (1 << PC3));
-    // Read 8 data bits
+
+    // Move to the middle of the bit-cell before sampling the data
+    delayMicroseconds(52 * 16 / 16 / 2);  // Half of the original delay value
+
     for (int i = 0; i < 8; ++i) {
-        // Add delay 
-        asm volatile("nop");
+        // Move to the middle of each data bit before sampling
+        delayMicroseconds(104 * 16 / 16 / 2);  // Half of the original delay value
+
         if (PINC & (1 << PC3)) {
             receivedData |= (1 << i);
         }
     }
+
     // Wait for stop bit
     while (!(PINC & (1 << PC3)));
     return receivedData;
 }
+
 //------------------------------------------------------------------------------
   void Fmsg(const char text[])                               // text is stored
   {char c;                                                   // in prog-mem to
