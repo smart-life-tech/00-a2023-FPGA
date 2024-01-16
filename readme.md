@@ -91,7 +91,7 @@ void collectDataFromFPGA(char* receivedData) {
         dataIndex++;
 ```
 
-- Stores the received character in the `receivedData` array and increments the `dataIndex` for the next character.
+- Stores the received character inm the `receivedData` array and increments the `dataIndex` for the next character.
 
 ```c
         // Echo the received character to TTY
